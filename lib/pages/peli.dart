@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movis_plus/pages/serie.dart';
 
 void main() {
   runApp(Pelis());
@@ -24,13 +25,30 @@ class Peli extends StatefulWidget {
 }
 
 class _PeliState extends State<Peli> {
+  int indice=0;
+
+
   @override
   Widget build(BuildContext context) {
+    List<Widget> screens=[Body(),Serie()];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Peliculas'),
       ),
-      body: Body(),
+      body: screens[indice],
+       bottomNavigationBar:BottomNavigationBar(
+        currentIndex : indice,
+        onTap: (valor){
+          setState(() {
+            indice=valor;
+          });
+        },
+       
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.headphones),label: "pelicuals"),
+          BottomNavigationBarItem(icon: Icon(Icons.add_link),label: "Series")
+        ],) ,
     );
   }
 }

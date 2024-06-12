@@ -1,18 +1,15 @@
 
-
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:movis_plus/main.dart';
-import 'package:movis_plus/pages/peli.dart';
-import 'package:movis_plus/pages/registro.dart';
+import 'package:movis_plus/pages/login.dart';
  
 void main() {
-  runApp(Loginscreen());
+  runApp(Registro());
 }
  
-class Loginscreen extends StatelessWidget {
-  const Loginscreen({super.key});
+class Registro extends StatelessWidget {
+  const Registro({super.key});
  
   @override
   Widget build(BuildContext context) {
@@ -37,7 +34,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: const Text('registro'),
       ),
       body: Body(context),
     );
@@ -57,7 +54,7 @@ Widget Body(context) {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text(
-                'Iniciar Sesión',
+                'Registro',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -96,7 +93,7 @@ Widget Body(context) {
                   print('Ir a la pantalla de cartelera');
                 },
                 child: const Text(
-                  'Iniciar Sesión',
+                  'Registrar',
                   style: TextStyle(color: Colors.white),
                 ),
               ),
@@ -133,28 +130,29 @@ Widget BotonVolver(context) {
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => FirebaseApp()));
       },
-      child: const Text('Ir a Welcome')));
+      child: const Text('Ir a login')));
 }
  
  
 Future<void> login(context) async {
-  try {
-  // ignore: unused_local_variable
-  final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+ try {
+  final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
     email: emailController.text,
-    password: passwordController.text
+    password: passwordController.text,
   );
    Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Peli(),
+                      builder: (context) => Loginscreen(),
                     ),
                   );
 } on FirebaseAuthException catch (e) {
-  if (e.code == 'user-not-found') {
-    print('No user found for that email.');
-  } else if (e.code == 'wrong-password') {
-    print('Wrong password provided for that user.');
+  if (e.code == 'weak-password') {
+    print('The password provided is too weak.');
+  } else if (e.code == 'email-already-in-use') {
+    print('The account already exists for that email.');
   }
+} catch (e) {
+  print(e);
 }
 }

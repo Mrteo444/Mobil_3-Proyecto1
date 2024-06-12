@@ -1,72 +1,87 @@
-import 'package:flutter/material.dart';
-import 'package:movis_plus/pages/peli.dart';
-import 'package:movis_plus/pages/serie.dart';
 
-void main() {
-  runApp(const MoviPlus());
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:movis_plus/pages/login.dart';
+import 'package:movis_plus/pages/registro.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const FirebaseApp());
 }
 
-class MoviPlus extends StatelessWidget {
-  const MoviPlus({super.key});
+class FirebaseApp extends StatelessWidget {
+  const FirebaseApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home:Home()
+      title: 'Firebase',
+      theme: ThemeData.dark(),
+      home: const Home(),
     );
   }
 }
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  const Home({Key? key}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  int indice=0; 
   @override
   Widget build(BuildContext context) {
-     List<Widget> screens=[Cuerpo(context),Peli(),Serie()];
-    return  Scaffold(
+    return Scaffold(
       appBar: AppBar(
-        title: const Text('Movis plus'),
+        title: const Text('MOVIS PLUS'),
       ),
-      body: screens[indice],
-      bottomNavigationBar:BottomNavigationBar(
-        currentIndex : indice,
-        onTap: (valor){
-          setState(() {
-            indice=valor;
-          });
-        },
-       
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home),label: "Inicio"),
-          BottomNavigationBarItem(icon: Icon(Icons.movie),label: "peliculas"),
-          BottomNavigationBarItem(icon: Icon(Icons.folder),label: "Series"),
-          //BottomNavigationBarItem(icon: Icon(Icons.add_link),label: "Config"),
-          
-        ],) 
-
-
-
+      body: Body(context),
     );
   }
 }
 
-Widget Cuerpo(context){
-  return(
-    Column(
+Widget Body(BuildContext context) {
+  return Center(
+    child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Text("bievenido"),
-        
+        // Aquí agregamos la imagen
+        Image.asset(
+          'assets/22.png', // Ruta de la imagen
+          width: 200, // Ancho de la imagen
+          height: 200, // Alto de la imagen
+        ),
+        const SizedBox(height: 20), // Espacio entre la imagen y los botones
+        const Text('WELCOME'),
+        BotonLogin(context),
+        BotonRegistro(context),
       ],
-    )
+    ),
+  );
+}
+Widget BotonLogin(context) {
+  return ElevatedButton(
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Loginscreen()),
+      );
+    },
+    child: const Text('Ir a Login'),
   );
 }
 
-
+Widget BotonRegistro(context) {
+  return ElevatedButton(
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Registro()),
+      );
+    },
+    child: const Text('Ir a Registro'), // Corrected text
+  );
+}
