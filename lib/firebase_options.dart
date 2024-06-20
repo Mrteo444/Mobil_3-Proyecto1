@@ -53,7 +53,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBt_5FYvJ7DSYmWsT7T9OszrJxiX7Hc5C4',
-    appId: '1:294989014319:android:63470aeef35a17f399edda',
+    appId: '1:294989014319:android:6cc9aeac95b2d1bb99edda',
     messagingSenderId: '294989014319',
     projectId: 'juego-6bb25',
     databaseURL: 'https://juego-6bb25-default-rtdb.firebaseio.com',

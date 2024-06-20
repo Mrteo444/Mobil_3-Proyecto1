@@ -27,6 +27,25 @@
     },
     {
       "client_info": {
+        "mobilesdk_app_id": "1:294989014319:android:6cc9aeac95b2d1bb99edda",
+        "android_client_info": {
+          "package_name": "com.appm.movisplus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBt_5FYvJ7DSYmWsT7T9OszrJxiX7Hc5C4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:294989014319:android:509ea86f1ab3a42b99edda",
         "android_client_info": {
           "package_name": "com.example.app"
@@ -68,6 +87,25 @@
         "mobilesdk_app_id": "1:294989014319:android:63470aeef35a17f399edda",
         "android_client_info": {
           "package_name": "com.example.movis_plus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBt_5FYvJ7DSYmWsT7T9OszrJxiX7Hc5C4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:294989014319:android:dec26702089d64d899edda",
+        "android_client_info": {
+          "package_name": "com.example.prueba3"
         }
       },
       "oauth_client": [],
