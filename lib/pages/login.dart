@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:movis_plus/main.dart';
 import 'package:movis_plus/pages/peli.dart';
 import 'package:movis_plus/pages/registro.dart';
+import 'package:movis_plus/pages/serie.dart';
  
 void main() {
   runApp(Loginscreen());

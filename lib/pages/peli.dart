@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movis_plus/pages/serie.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void main() {
@@ -29,7 +30,7 @@ class _PeliState extends State<Peli> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> screens = [Body(), Serie()];
+    List<Widget> screens = [Body(), Series()];
 
     return Scaffold(
       appBar: AppBar(
@@ -218,19 +219,19 @@ class Body extends StatelessWidget {
   }
 }
 
-class Serie extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Series"),
-      ),
-      body: Center(
-        child: const Text(
-          "Página de series",
-          style: TextStyle(fontSize: 24),
-        ),
-      ),
-    );
-  }
-}
+// class Serie extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text("Series"),
+//       ),
+//       body: Center(
+//         child: const Text(
+//           "Página de series",
+//           style: TextStyle(fontSize: 24),
+//         ),
+//       ),
+//     );
+//   }
+// }

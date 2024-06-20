@@ -1,0 +1,40 @@
+{
+    "peliculas": [
+      {
+        "titulo": "Origen",
+        "anio": 2010,
+        "descripcion": "Un ladrón que roba secretos corporativos mediante el uso de la tecnología de compartir sueños recibe la tarea inversa de plantar una idea en la mente de un CEO.",
+        "imagen": "https://raw.githubusercontent.com/jritsqmet/web-api/main/assets/images/api-peliculas/origen.jpg",
+        "url": "https://firebasestorage.googleapis.com/v0/b/app-login-13c72.appspot.com/o/videos%2FOrigen2.mp4?alt=media&token=b2990342-9dc0-4e9e-8e5e-153e8adeb4ca"
+      },
+      {
+        "titulo": "ami bebe",
+        "anio": 2008,
+        "descripcion": "Cuando la amenaza conocida como el Joker causa estragos y caos en la gente de Gotham, Batman debe enfrentar uno de los mayores desafíos psicológicos y físicos para luchar contra la injusticia.",
+        "imagen": "https://raw.githubusercontent.com/jritsqmet/web-api/main/assets/images/api-peliculas/caballero_oscuro.jpg",
+        "url": "https://firebasestorage.googleapis.com/v0/b/juego-6bb25.appspot.com/o/video%2FRels%20B%20-%20A%20M%C3%8D%20(Videoclip%20Oficial).mp4?alt=media&token=6a23d47a-dae6-4ea8-ad12-4112225439d8"
+      },
+      {
+        "titulo": "AMI",
+        "anio": 2014,
+        "descripcion": "Un equipo de exploradores viaja a través de un agujero de gusano en el espacio en un intento por asegurar la supervivencia de la humanidad.",
+        "imagen": "https://raw.githubusercontent.com/jritsqmet/web-api/main/assets/images/api-peliculas/interestellar.jpg",
+        "url": "https://firebasestorage.googleapis.com/v0/b/juego-6bb25.appspot.com/o/video%2FRels%20B%20-%20A%20M%C3%8D%20(Videoclip%20Oficial).mp4?alt=media&token=6a23d47a-dae6-4ea8-ad12-4112225439d8"
+      },
+      {
+        "titulo": "La La Land",
+        "anio": 2016,
+        "descripcion": "En Los Ángeles, un pianista de jazz se enamora de una aspirante a actriz mientras ambos persiguen sus sueños en una ciudad conocida por destruir esperanzas y romper corazones.",
+        "imagen": "https://raw.githubusercontent.com/jritsqmet/web-api/main/assets/images/api-peliculas/la-la-land.jpg",
+        "url": "https://www.imdb.com/title/tt3783958/"
+      },
+      {
+        "titulo": "El Padrino",
+        "anio": 1972,
+        "descripcion": "El patriarca de una poderosa familia de mafiosos intenta traspasar el negocio a su hijo renuente mientras se enfrenta a los retos de mantener su imperio criminal.",
+        "imagen": "https://raw.githubusercontent.com/jritsqmet/web-api/main/assets/images/api-peliculas/el_padrino.webp",
+        "url": "https://www.imdb.com/title/tt0068646/"
+      }
+    ]
+  }
+  

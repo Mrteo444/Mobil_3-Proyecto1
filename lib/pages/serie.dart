@@ -1,236 +1,132 @@
-import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-void main() {
-  runApp(Serie());
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:movis_plus/pages/video_playr.screem.dart';
+import 'dart:convert';
+
+import 'package:firebase_core/firebase_core.dart';
+
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(Series());
+  
 }
 
-class Serie extends StatelessWidget {
-  const Serie({Key? key});
+class Series extends StatelessWidget {
+  const Series({Key? key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Peli(),
+      home: Lista(),
     );
   }
 }
-
-class Peli extends StatefulWidget {
-  const Peli({Key? key});
-
+//////////////////////////////////////////////////////
+class Lista extends StatefulWidget {
   @override
-  State<Peli> createState() => _PeliState();
+  _ListaState createState() => _ListaState();
 }
 
-class _PeliState extends State<Peli> {
+class _ListaState extends State<Lista> {
+  List<Map<String, dynamic>> peliculasList = [];
   int indice = 0;
 
   @override
-  Widget build(BuildContext context) {
-    List<Widget> screens = [Body(), SerieContent()];
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Películas'),
-      ),
-      body: screens[indice],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: indice,
-        onTap: (valor) {
-          setState(() {
-            indice = valor;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.headphones), label: "Películas"),
-          BottomNavigationBarItem(icon: Icon(Icons.add_link), label: "Series")
-        ],
-      ),
-    );
-  }
-}
-
-class Body extends StatelessWidget {
-  final List<Map<String, String>> movies = [
-    {
-      "title": "Shrek",
-      "image": "https://www.esdip.com/wp-content/uploads/2023/01/historia-de-la-animacion_la-saga-shrek.jpg",
-      "videoLink": "https://www.youtube.com/watch?v=CwXOrWvPBPk"
-    },
-    {
-      "title": "Pug",
-      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2_b6IDJ8bWBycqGKLq_psnuAjeRSpgWKCkg&s",
-      "videoLink": "https://www.youtube.com/watch?v=tOXszq1-rxs"
-    },
-    {
-      "title": "La Gritona",
-      "image": "https://losmitosyleyendas.com/wp-content/uploads/2024/02/image-87.jpg",
-      "videoLink": "https://www.youtube.com/watch?v=JoTbiH3Wppo"
-    },
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Películas"),
-      ),
-      body: Column(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              "Películas populares",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: movies.length,
-              itemBuilder: (BuildContext context, int index) {
-                return GestureDetector(
-                  onTap: () {
-                    _launchYouTubeVideo(movies[index]["videoLink"]!);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        FutureBuilder(
-                          future: precacheImage(
-                            NetworkImage(movies[index]["image"]!),
-                            context,
-                          ),
-                          builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const SizedBox(
-                                width: 120,
-                                height: 180,
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            } else if (snapshot.hasError) {
-                              return const SizedBox(
-                                width: 120,
-                                height: 180,
-                                child: Center(
-                                  child: Text(
-                                    "Error de carga de imagen",
-                                    style: TextStyle(
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            } else {
-                              return Container(
-                                width: 120,
-                                height: 180,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  image: DecorationImage(
-                                    image: NetworkImage(movies[index]["image"]!),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          movies[index]["title"]!,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              "Más películas",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: movies.length,
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(movies[index]["image"]!),
-                  ),
-                  title: Text(movies[index]["title"]!),
-                  onTap: () {
-                    _launchYouTubeVideo(movies[index]["videoLink"]!);
-                  },
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
+  void initState() {
+    super.initState();
+    getData();
   }
 
-  Future<void> _launchYouTubeVideo(String videoLink) async {
-    try {
-      Uri uri = Uri.parse(videoLink);
+  Future<void> getData() async {
+    /////////////////////////////////////////
+    /// Función con el objetivo de traer los datos
+    /////////////////////////////////////////
+    
+    final response = await http.get(Uri.parse('https://mrteo444.github.io/api_mobiles/peliculas.json'));
 
-      // Manejar diferentes estructuras de URL de YouTube
-      String videoId = '';
-      if (uri.host == 'www.youtube.com' && uri.path == '/watch') {
-        videoId = uri.queryParameters['v'] ?? '';
-      } else if (uri.host == 'youtu.be') {
-        videoId = uri.pathSegments.first;
-      }
-
-      if (videoId.isNotEmpty) {
-        final url = 'https://www.youtube.com/watch?v=$videoId';
-        if (await canLaunch(url)) {
-          await launch(url);
-        } else {
-          throw 'No se pudo abrir el video $url';
-        }
-      } else {
-        throw 'Enlace de video de YouTube inválido: $videoLink';
-      }
-    } catch (e) {
-      print('Error al abrir el video: $e');
+    if (response.statusCode == 200) {
+      // Decodificar el JSON y actualizar la lista
+      updateProductList(json.decode(response.body));
+    } else {
+      throw Exception('Error al cargar los datos');
     }
   }
-}
 
-class SerieContent extends StatelessWidget {
+  void updateProductList(List<dynamic> data) {
+    List<Map<String, dynamic>> tempList = [];
+
+    data.forEach((element) {
+      //////////////////////////////////////////
+      /// Se asigna la clave y valor a la lista temporal
+      //////////////////////////////////////////
+      tempList.add({
+        "titulo": element['titulo'],
+        
+        "url": element['url'], 
+      });
+    });
+
+    setState(() {
+      peliculasList = tempList;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Series"),
+        title: Text('Lista de Películas'),
       ),
-      body: Center(
-        child: const Text(
-          "Página de series",
-          style: TextStyle(fontSize: 24),
-        ),
-      ),
+      body:Cuerpo(),
+      
     );
   }
+
+ Widget Cuerpo() {
+  return GridView.builder(
+    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2,
+      crossAxisSpacing: 10.0,
+      mainAxisSpacing: 10.0,
+      childAspectRatio: 0.75,
+    ),
+    itemCount: peliculasList.length,
+    itemBuilder: (context, index) {
+      return GestureDetector(
+        onTap: () {
+          // Navegar a la pantalla del reproductor de video
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VideoPlayerScreen(videoUrl: peliculasList[index]["url"]),
+            ),
+          );
+        },
+        child: Card(
+          elevation: 5.0,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Expanded(
+                child: Placeholder(), // Placeholder para la imagen
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  peliculasList[index]["titulo"] ?? '', // Verificar si el título existe
+                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
 }
