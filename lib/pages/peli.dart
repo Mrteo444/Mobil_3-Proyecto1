@@ -1,28 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'package:firebase_core/firebase_core.dart';
 import 'package:movis_plus/pages/serie.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:movis_plus/pages/video_playr.screem.dart';
 
-void main() {
-  runApp(Pelis());
-}
-
-class Pelis extends StatelessWidget {
-  const Pelis({Key? key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Peli(),
-    );
-  }
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(Peli());
 }
 
 class Peli extends StatefulWidget {
-  const Peli({Key? key});
-
   @override
-  State<Peli> createState() => _PeliState();
+  _PeliState createState() => _PeliState();
 }
 
 class _PeliState extends State<Peli> {
@@ -30,127 +22,197 @@ class _PeliState extends State<Peli> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> screens = [Body(), Series()];
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Películas'),
+    List<Widget> screens = [Lista(), Series()]; // Agrega Series() si está implementado
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.black,
       ),
-      body: screens[indice],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: indice,
-        onTap: (valor) {
-          setState(() {
-            indice = valor;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.headphones), label: "Películas"),
-          BottomNavigationBarItem(icon: Icon(Icons.add_link), label: "Series")
-        ],
+      home: Scaffold(
+        body: screens[indice],
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: indice,
+          onTap: (valor) {
+            setState(() {
+              indice = valor; // Aquí se actualiza el índice y se vuelve a dibujar el widget
+            });
+          },
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.headphones), label: "Películas"),
+            BottomNavigationBarItem(icon: Icon(Icons.add_link), label: "Series"),
+          ],
+        ),
       ),
     );
   }
 }
 
-class Body extends StatelessWidget {
-  final List<Map<String, String>> movies = [
-    {
-      "title": "Shrek",
-      "image": "https://www.esdip.com/wp-content/uploads/2023/01/historia-de-la-animacion_la-saga-shrek.jpg",
-      "videoLink": "https://www.youtube.com/watch?v=CwXOrWvPBPk"
-    },
-    {
-      "title": "Pug",
-      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2_b6IDJ8bWBycqGKLq_psnuAjeRSpgWKCkg&s",
-      "videoLink": "https://www.youtube.com/watch?v=tOXszq1-rxs"
-    },
-    {
-      "title": "La Gritona",
-      "image": "https://losmitosyleyendas.com/wp-content/uploads/2024/02/image-87.jpg",
-      "videoLink": "https://www.youtube.com/watch?v=JoTbiH3Wppo"
-    },
-  ];
+class Lista extends StatefulWidget {
+  @override
+  _ListaState createState() => _ListaState();
+}
+
+class _ListaState extends State<Lista> {
+  List<Map<String, dynamic>> peliculasList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
+  Future<void> getData() async {
+    final response =
+        await http.get(Uri.parse('https://mrteo444.github.io/api_mobiles/peliculas.json'));
+
+    if (response.statusCode == 200) {
+      updateProductList(json.decode(response.body));
+    } else {
+      throw Exception('Error al cargar los datos');
+    }
+  }
+
+  void updateProductList(List<dynamic> data) {
+    List<Map<String, dynamic>> tempList = [];
+
+    data.forEach((element) {
+      String? imagenUrl = element['imagen'];
+      if (imagenUrl != null && imagenUrl.isNotEmpty) {
+        tempList.add({
+          "titulo": element['titulo'],
+          "imagen": imagenUrl,
+          "descripcion": element['descripcion'] ?? 'No hay descripción disponible',
+          "url": element['url'],
+        });
+      }
+    });
+
+    setState(() {
+      peliculasList = tempList;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Películas"),
+        title: Text('Lista de Películas'),
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              "Películas populares",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          Expanded(
+          Container(
+            height: 200,
+            color: Color.fromARGB(255, 11, 0, 13), // Color morado para la galería
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: movies.length,
-              itemBuilder: (BuildContext context, int index) {
+              itemCount: peliculasList.length,
+              itemBuilder: (context, index) {
+                String? imagenUrl = peliculasList[index]["imagen"];
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              VideoPlayerScreen(videoUrl: peliculasList[index]["url"]),
+                        ),
+                      );
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image.network(
+                        imagenUrl ?? '',
+                        width: 150,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          SizedBox(
+            height: 20, // Espacio rojo en el centro
+            child: Container(color: Color.fromARGB(255, 174, 24, 13)),
+          ),
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10.0,
+                mainAxisSpacing: 10.0,
+                childAspectRatio: 0.75,
+              ),
+              itemCount: peliculasList.length,
+              itemBuilder: (context, index) {
+                String? imagenUrl = peliculasList[index]["imagen"];
                 return GestureDetector(
                   onTap: () {
-                    _launchYouTubeVideo(movies[index]["videoLink"]!);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            VideoPlayerScreen(videoUrl: peliculasList[index]["url"]),
+                      ),
+                    );
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                  child: Card(
+                    elevation: 5.0,
+                    color: Colors.grey[850],
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
-                        FutureBuilder(
-                          future: precacheImage(
-                            NetworkImage(movies[index]["image"]!),
-                            context,
-                          ),
-                          builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const SizedBox(
-                                width: 120,
-                                height: 180,
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            } else if (snapshot.hasError) {
-                              return const SizedBox(
-                                width: 120,
-                                height: 180,
-                                child: Center(
-                                  child: Text(
-                                    "Error de carga de imagen",
-                                    style: TextStyle(
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            } else {
-                              return Container(
-                                width: 120,
-                                height: 180,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  image: DecorationImage(
-                                    image: NetworkImage(movies[index]["image"]!),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              );
-                            }
-                          },
+                        Expanded(
+                          child: imagenUrl != null && imagenUrl.isNotEmpty
+                              ? Image.network(
+                                  imagenUrl,
+                                  fit: BoxFit.cover,
+                                )
+                              : Placeholder(),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          movies[index]["title"]!,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            peliculasList[index]["titulo"] ?? '',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text(peliculasList[index]["titulo"] ?? ''),
+                                    content: Text(
+                                      peliculasList[index]["descripcion"] ?? '',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('Cerrar'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            child: Text('Más'),
                           ),
                         ),
                       ],
@@ -160,78 +222,8 @@ class Body extends StatelessWidget {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              "Más películas",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: movies.length,
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(movies[index]["image"]!),
-                  ),
-                  title: Text(movies[index]["title"]!),
-                  onTap: () {
-                    _launchYouTubeVideo(movies[index]["videoLink"]!);
-                  },
-                );
-              },
-            ),
-          ),
         ],
       ),
     );
   }
-
-  Future<void> _launchYouTubeVideo(String videoLink) async {
-    try {
-      Uri uri = Uri.parse(videoLink);
-
-      // Manejar diferentes estructuras de URL de YouTube
-      String videoId = '';
-      if (uri.host == 'www.youtube.com' && uri.path == '/watch') {
-        videoId = uri.queryParameters['v'] ?? '';
-      } else if (uri.host == 'youtu.be') {
-        videoId = uri.pathSegments.first;
-      }
-
-      if (videoId.isNotEmpty) {
-        final url = 'https://www.youtube.com/watch?v=$videoId';
-        if (await canLaunch(url)) {
-          await launch(url);
-        } else {
-          throw 'No se pudo abrir el video $url';
-        }
-      } else {
-        throw 'Enlace de video de YouTube inválido: $videoLink';
-      }
-    } catch (e) {
-      print('Error al abrir el video: $e');
-    }
-  }
 }
-
-// class Serie extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text("Series"),
-//       ),
-//       body: Center(
-//         child: const Text(
-//           "Página de series",
-//           style: TextStyle(fontSize: 24),
-//         ),
-//       ),
-//     );
-//   }
-// }

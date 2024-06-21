@@ -1,30 +1,31 @@
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:movis_plus/pages/video_playr.screem.dart';
 import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:movis_plus/pages/video_playr.screem.dart';
 
-
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(Series());
-  
 }
 
 class Series extends StatelessWidget {
-  const Series({Key? key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.black,
+      ),
       home: Lista(),
     );
   }
 }
-//////////////////////////////////////////////////////
+
 class Lista extends StatefulWidget {
   @override
   _ListaState createState() => _ListaState();
@@ -32,7 +33,6 @@ class Lista extends StatefulWidget {
 
 class _ListaState extends State<Lista> {
   List<Map<String, dynamic>> peliculasList = [];
-  int indice = 0;
 
   @override
   void initState() {
@@ -41,14 +41,10 @@ class _ListaState extends State<Lista> {
   }
 
   Future<void> getData() async {
-    /////////////////////////////////////////
-    /// Función con el objetivo de traer los datos
-    /////////////////////////////////////////
-    
-    final response = await http.get(Uri.parse('https://mrteo444.github.io/api_mobiles/peliculas.json'));
+    final response =
+        await http.get(Uri.parse('https://mrteo444.github.io/api_mobiles/series.json'));
 
     if (response.statusCode == 200) {
-      // Decodificar el JSON y actualizar la lista
       updateProductList(json.decode(response.body));
     } else {
       throw Exception('Error al cargar los datos');
@@ -59,14 +55,15 @@ class _ListaState extends State<Lista> {
     List<Map<String, dynamic>> tempList = [];
 
     data.forEach((element) {
-      //////////////////////////////////////////
-      /// Se asigna la clave y valor a la lista temporal
-      //////////////////////////////////////////
-      tempList.add({
-        "titulo": element['titulo'],
-        
-        "url": element['url'], 
-      });
+      String? imagenUrl = element['imagen'];
+      if (imagenUrl != null && imagenUrl.isNotEmpty) {
+        tempList.add({
+          "titulo": element['titulo'],
+          "imagen": imagenUrl,
+          "descripcion": element['descripcion'] ?? 'No hay descripción disponible',
+          "url": element['url'],
+        });
+      }
     });
 
     setState(() {
@@ -76,57 +73,134 @@ class _ListaState extends State<Lista> {
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       appBar: AppBar(
         title: Text('Lista de Películas'),
       ),
-      body:Cuerpo(),
-      
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Container(
+            height: 200,
+            color: Color.fromARGB(255, 11, 0, 13), // Color morado para la galería
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: peliculasList.length,
+              itemBuilder: (context, index) {
+                String? imagenUrl = peliculasList[index]["imagen"];
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              VideoPlayerScreen(videoUrl: peliculasList[index]["url"]),
+                        ),
+                      );
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image.network(
+                        imagenUrl ?? '',
+                        width: 150,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          SizedBox(
+            height: 20, // Espacio rojo en el centro
+            child: Container(color: Color.fromARGB(255, 174, 24, 13)),
+          ),
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10.0,
+                mainAxisSpacing: 10.0,
+                childAspectRatio: 0.75,
+              ),
+              itemCount: peliculasList.length,
+              itemBuilder: (context, index) {
+                String? imagenUrl = peliculasList[index]["imagen"];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            VideoPlayerScreen(videoUrl: peliculasList[index]["url"]),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    elevation: 5.0,
+                    color: Colors.grey[850],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        Expanded(
+                          child: imagenUrl != null && imagenUrl.isNotEmpty
+                              ? Image.network(
+                                  imagenUrl,
+                                  fit: BoxFit.cover,
+                                )
+                              : Placeholder(),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            peliculasList[index]["titulo"] ?? '',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text(peliculasList[index]["titulo"] ?? ''),
+                                    content: Text(
+                                      peliculasList[index]["descripcion"] ?? '',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('Cerrar'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            child: Text('Más'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
-
- Widget Cuerpo() {
-  return GridView.builder(
-    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 2,
-      crossAxisSpacing: 10.0,
-      mainAxisSpacing: 10.0,
-      childAspectRatio: 0.75,
-    ),
-    itemCount: peliculasList.length,
-    itemBuilder: (context, index) {
-      return GestureDetector(
-        onTap: () {
-          // Navegar a la pantalla del reproductor de video
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => VideoPlayerScreen(videoUrl: peliculasList[index]["url"]),
-            ),
-          );
-        },
-        child: Card(
-          elevation: 5.0,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Expanded(
-                child: Placeholder(), // Placeholder para la imagen
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  peliculasList[index]["titulo"] ?? '', // Verificar si el título existe
-                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  );
-}
-
 }
